@@ -150,6 +150,9 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 );
                               },
+                              onFavoriteTap: () {
+                                context.read<CountriesBloc>().add(ToggleFavoriteEvent(country.cca2));
+                              },
                             );
                           },
                         );

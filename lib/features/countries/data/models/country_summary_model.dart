@@ -1,15 +1,16 @@
-class CountrySummaryModel {
-  final String name;
-  final String flag;
-  final int population;
-  final String cca2;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  CountrySummaryModel({
-    required this.name,
-    required this.flag,
-    required this.population,
-    required this.cca2,
-  });
+part 'country_summary_model.freezed.dart';
+part 'country_summary_model.g.dart';
+
+@freezed
+class CountrySummaryModel with _$CountrySummaryModel {
+  const factory CountrySummaryModel({
+    required String name,
+    required String flag,
+    required int population,
+    required String cca2,
+  }) = _CountrySummaryModel;
 
   factory CountrySummaryModel.fromJson(Map<String, dynamic> json) {
     return CountrySummaryModel(

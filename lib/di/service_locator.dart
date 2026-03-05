@@ -1,5 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
+import 'package:path_provider/path_provider.dart';
 import '../core/network/dio_client.dart';
 import '../features/countries/data/datasources/countries_remote_datasource.dart';
 import '../features/countries/data/datasources/countries_local_datasource.dart';
@@ -46,8 +49,18 @@ Future<void> init() async {
     () => CountriesLocalDataSourceImpl(sl()),
   );
 
-  // Core
-  sl.registerLazySingleton(() => DioClient());
+  // Core - Cache
+  final cacheDir = await getTemporaryDirectory();
+  final cacheStore = HiveCacheStore(cacheDir.path);
+  final cacheOptions = CacheOptions(
+    store: cacheStore,
+    policy: CachePolicy.forceCache,
+    maxStale: const Duration(days: 7),
+    priority: CachePriority.high,
+    hitCacheOnErrorExcept: [401, 403],
+  );
+  sl.registerLazySingleton(() => cacheOptions);
+  sl.registerLazySingleton(() => DioClient(sl()));
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();

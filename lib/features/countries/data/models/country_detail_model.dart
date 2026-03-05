@@ -1,27 +1,24 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/country.dart';
 
-class CountryDetailModel {
-  final String name;
-  final String flag;
-  final int population;
-  final String cca2;
-  final String? capital;
-  final String? region;
-  final String? subregion;
-  final double? area;
-  final List<String>? timezones;
+part 'country_detail_model.freezed.dart';
+part 'country_detail_model.g.dart';
 
-  CountryDetailModel({
-    required this.name,
-    required this.flag,
-    required this.population,
-    required this.cca2,
-    this.capital,
-    this.region,
-    this.subregion,
-    this.area,
-    this.timezones,
-  });
+@freezed
+class CountryDetailModel with _$CountryDetailModel {
+  const CountryDetailModel._();
+
+  const factory CountryDetailModel({
+    required String name,
+    required String flag,
+    required int population,
+    required String cca2,
+    String? capital,
+    String? region,
+    String? subregion,
+    double? area,
+    List<String>? timezones,
+  }) = _CountryDetailModel;
 
   factory CountryDetailModel.fromJson(Map<String, dynamic> json) {
     return CountryDetailModel(

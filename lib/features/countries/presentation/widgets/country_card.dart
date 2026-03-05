@@ -5,12 +5,14 @@ class CountryCard extends StatelessWidget {
   final Country country;
   final bool isFavorite;
   final VoidCallback onTap;
+  final VoidCallback onFavoriteTap;
 
   const CountryCard({
     super.key,
     required this.country,
     required this.isFavorite,
     required this.onTap,
+    required this.onFavoriteTap,
   });
 
   String _formatPopulation(int population) {
@@ -46,9 +48,12 @@ class CountryCard extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text('Population: ${_formatPopulation(country.population)}'),
-        trailing: Icon(
-          isFavorite ? Icons.favorite : Icons.favorite_border,
-          color: isFavorite ? Colors.red : null,
+        trailing: IconButton(
+          icon: Icon(
+            isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: isFavorite ? Colors.red : null,
+          ),
+          onPressed: onFavoriteTap,
         ),
       ),
     );
