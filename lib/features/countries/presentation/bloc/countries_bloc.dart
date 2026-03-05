@@ -80,9 +80,20 @@ class CountriesBloc extends Bloc<CountriesEvent, CountriesState> {
   Future<void> _onToggleFavorite(
       ToggleFavoriteEvent event, Emitter<CountriesState> emit) async {
     await manageFavorites.toggleFavorite(event.cca2);
-    if (state is CountryDetailLoaded) {
+    final favoritesResult = await manageFavorites.getFavorites();
+    
+    if (state is CountriesLoaded) {
+      final currentState = state as CountriesLoaded;
+      favoritesResult.fold(
+        (failure) => null,
+        (favorites) => emit(CountriesLoaded(currentState.countries, favorites)),
+      );
+    } else if (state is CountryDetailLoaded) {
       final currentState = state as CountryDetailLoaded;
-      emit(CountryDetailLoaded(currentState.country, !currentState.isFavorite));
+      favoritesResult.fold(
+        (failure) => emit(CountryDetailLoaded(currentState.country, !currentState.isFavorite)),
+        (favorites) => emit(CountryDetailLoaded(currentState.country, favorites.contains(event.cca2))),
+      );
     }
   }
 

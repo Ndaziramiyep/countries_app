@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 import '../bloc/countries_bloc.dart';
 import '../bloc/countries_event.dart';
 import '../bloc/countries_state.dart';
 import '../widgets/country_card.dart';
-import 'favorites_page.dart';
 import 'country_detail_page.dart';
-import 'dart:async';
 
 class HomePage extends StatefulWidget {
-  final VoidCallback onThemeToggle;
-  const HomePage({super.key, required this.onThemeToggle});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -29,41 +27,14 @@ class _HomePageState extends State<HomePage> {
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
+    setState(() {});
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      context.read<CountriesBloc>().add(SearchCountriesEvent(query));
+      if (query.isEmpty) {
+        context.read<CountriesBloc>().add(LoadAllCountries());
+      } else {
+        context.read<CountriesBloc>().add(SearchCountriesEvent(query));
+      }
     });
-  }
-
-  Future<void> _onRefresh() async {
-    context.read<CountriesBloc>().add(LoadAllCountries());
-    await Future.delayed(const Duration(seconds: 1));
-  }
-
-  void _showSortOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.sort_by_alpha),
-            title: const Text('Sort by Name'),
-            onTap: () {
-              context.read<CountriesBloc>().add(SortCountries('name'));
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Sort by Population'),
-            onTap: () {
-              context.read<CountriesBloc>().add(SortCountries('population'));
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -71,25 +42,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Countries'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: _showSortOptions,
-          ),
-          IconButton(
-            icon: const Icon(Icons.brightness_6),
-            onPressed: widget.onThemeToggle,
-          ),
-          IconButton(
-            icon: const Icon(Icons.favorite),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const FavoritesPage()),
-              );
-            },
-          ),
-        ],
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -100,9 +53,23 @@ class _HomePageState extends State<HomePage> {
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'Search for a country',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: TextStyle(color: Colors.grey[400]),
+                prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          context.read<CountriesBloc>().add(LoadAllCountries());
+                          setState(() {});
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: Colors.grey[100],
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
@@ -116,45 +83,32 @@ class _HomePageState extends State<HomePage> {
                   if (state.countries.isEmpty) {
                     return const Center(child: Text('No countries found'));
                   }
-                  return RefreshIndicator(
-                    onRefresh: _onRefresh,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final isTablet = constraints.maxWidth > 600;
-                        return GridView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: isTablet ? 2 : 1,
-                            childAspectRatio: isTablet ? 3 : 5,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          itemCount: state.countries.length,
-                          itemBuilder: (context, index) {
-                            final country = state.countries[index];
-                            return CountryCard(
-                              country: country,
-                              isFavorite: state.favorites.contains(country.cca2),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CountryDetailPage(
-                                      code: country.cca2,
-                                      heroTag: 'flag_${country.cca2}',
-                                    ),
-                                  ),
-                                );
-                              },
-                              onFavoriteTap: () {
-                                context.read<CountriesBloc>().add(ToggleFavoriteEvent(country.cca2));
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    itemCount: state.countries.length,
+                    itemBuilder: (context, index) {
+                      final country = state.countries[index];
+                      return CountryCard(
+                        country: country,
+                        isFavorite: state.favorites.contains(country.cca2),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CountryDetailPage(
+                                code: country.cca2,
+                                heroTag: 'flag_${country.cca2}',
+                              ),
+                            ),
+                          );
+                        },
+                        onFavoriteTap: () {
+                          context.read<CountriesBloc>().add(
+                                ToggleFavoriteEvent(country.cca2),
+                              );
+                        },
+                      );
+                    },
                   );
                 } else if (state is CountriesError) {
                   return Center(child: Text(state.message));
