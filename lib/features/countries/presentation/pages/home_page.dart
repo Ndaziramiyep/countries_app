@@ -19,7 +19,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  String _currentSort = 'none';
 
   @override
   void dispose() {
@@ -50,7 +49,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.sort_by_alpha),
             title: const Text('Sort by Name'),
             onTap: () {
-              setState(() => _currentSort = 'name');
               context.read<CountriesBloc>().add(SortCountries('name'));
               Navigator.pop(context);
             },
@@ -59,7 +57,6 @@ class _HomePageState extends State<HomePage> {
             leading: const Icon(Icons.people),
             title: const Text('Sort by Population'),
             onTap: () {
-              setState(() => _currentSort = 'population');
               context.read<CountriesBloc>().add(SortCountries('population'));
               Navigator.pop(context);
             },

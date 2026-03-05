@@ -1,9 +1,15 @@
+/// Country Detail Data Model
+/// 
+/// Complete country information model for detail views.
+/// Uses Freezed for immutability and includes domain entity conversion.
+library;
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/country.dart';
 
 part 'country_detail_model.freezed.dart';
-part 'country_detail_model.g.dart';
 
+/// Immutable country detail model with full information
 @freezed
 class CountryDetailModel with _$CountryDetailModel {
   const CountryDetailModel._();
@@ -20,6 +26,9 @@ class CountryDetailModel with _$CountryDetailModel {
     List<String>? timezones,
   }) = _CountryDetailModel;
 
+  /// Creates model from REST Countries API response
+  /// 
+  /// Handles nested JSON structure, arrays, and type conversions
   factory CountryDetailModel.fromJson(Map<String, dynamic> json) {
     return CountryDetailModel(
       name: json['name']['common'] ?? '',
@@ -38,6 +47,9 @@ class CountryDetailModel with _$CountryDetailModel {
     );
   }
 
+  /// Converts data model to domain entity
+  /// 
+  /// Separates data layer from domain layer for clean architecture
   Country toEntity() {
     return Country(
       name: name,

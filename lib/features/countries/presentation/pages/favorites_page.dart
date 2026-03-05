@@ -46,6 +46,9 @@ class FavoritesPage extends StatelessWidget {
                         ),
                       );
                     },
+                    onFavoriteTap: () {
+                      context.read<CountriesBloc>().add(ToggleFavoriteEvent(country.cca2));
+                    },
                   );
                 },
               );

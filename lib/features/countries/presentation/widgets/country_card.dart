@@ -1,6 +1,13 @@
+/// Country Card Widget
+/// 
+/// Displays country summary in a card format with flag, name, population.
+/// Supports favorite toggle and navigation to details.
+library;
+
 import 'package:flutter/material.dart';
 import '../../domain/entities/country.dart';
 
+/// Reusable country card component
 class CountryCard extends StatelessWidget {
   final Country country;
   final bool isFavorite;
@@ -15,6 +22,7 @@ class CountryCard extends StatelessWidget {
     required this.onFavoriteTap,
   });
 
+  /// Formats population with K/M suffixes
   String _formatPopulation(int population) {
     if (population >= 1000000) {
       return '${(population / 1000000).toStringAsFixed(2)}M';
